@@ -69,7 +69,6 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
         return false; // Player is not looking at the enemy
     }
 
-    // Method to make the enemy move back and forth
     void Moving()
     {
         // Calculate the movement based on a sine wave to make it oscillate

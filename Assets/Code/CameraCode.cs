@@ -14,7 +14,7 @@ public class CameraCode : MonoBehaviour
 
     public string LookingAt;
 
-    public enum PlayerStates {Idle, Walking, Crouching, Sprinting, Stunned};
+    public enum PlayerStates {Menu, Idle, Walking, Crouching, Sprinting, Stunned};
 
     public float StunnedTimer = 0;
 
@@ -30,7 +30,7 @@ public class CameraCode : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
 
         LookingAt = "Nothing";
-        State = PlayerStates.Idle;  // Set State to Idle initially
+        State = PlayerStates.Menu;  // Set State to Menu initially
 
         transform.position = new Vector3(8, 2.5f, 26);
         TargetPlayer.transform.position = transform.position + new Vector3(0, -3, 0);
@@ -39,7 +39,11 @@ public class CameraCode : MonoBehaviour
 
     void Update()
     {
-        if(State == PlayerStates.Stunned)
+        if(State == PlayerStates.Menu)
+        {
+            MenuControls();
+        }    
+        else if(State == PlayerStates.Stunned)
         {
             StunnedControls();
         }
@@ -151,6 +155,11 @@ public class CameraCode : MonoBehaviour
     {
         if (State == st) return;
         State = st;
+        if (State == PlayerStates.Menu)
+        {
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+        }
         if (State == PlayerStates.Idle)
         {
             //Debug.Log(st);
@@ -177,6 +186,14 @@ public class CameraCode : MonoBehaviour
         }
     }
 
+    public void MenuControls()
+    {
+        if (Input.GetKey(KeyCode.P))
+        {
+            SetState(PlayerStates.Idle);
+        }
+    }
+
     public void StunnedControls()
     {
         StunnedTimer -= Time.deltaTime;
@@ -192,7 +209,7 @@ public class CameraCode : MonoBehaviour
        {
             SetState(PlayerStates.Stunned);
             //Death Sound and Effect
-            //GameMasterCode.Singleton.PlayRandomSoundFXClip(DeathSoundClip, transform, 1f);
+            //GameMasterCode.Singleton.PlaySoundFXClip(DeathSoundClip, transform, 1f);
             //Instantiate(PlayerDeathEffect, transform.position, transform.rotation);
             //Destroy(gameObject);
        }
