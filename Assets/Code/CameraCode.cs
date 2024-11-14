@@ -10,14 +10,11 @@ public class CameraCode : MonoBehaviour
     public float mouseSensitivity = 2f;
     float cameraVerticalRotation = 0f;
     float cameraHorizontalRotation = 0f;
-    public float speed = 10f;
+    public float speed = 5f;
 
     public string LookingAt;
 
-    private Vector3 originalPosition;
-    private Quaternion originalRotation;
-
-    public enum PlayerStates { None, Idle, Walking, Jumping, Stunned};
+    public enum PlayerStates {Idle, Walking, Crouching, Sprinting, Stunned};
 
     public float StunnedTimer = 0;
 
@@ -27,7 +24,7 @@ public class CameraCode : MonoBehaviour
     void Start()
     {
         mouseSensitivity = 2f;
-        speed = 10f;
+        speed = 5f;
         RB.isKinematic = true;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
@@ -54,8 +51,6 @@ public class CameraCode : MonoBehaviour
 
     void NormalControls()
     {
-        PlayerStates st = PlayerStates.Idle;
-        //Debug.Log(st);
         RB.isKinematic = false;
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
@@ -78,10 +73,27 @@ public class CameraCode : MonoBehaviour
         // Create a movement vector
         Vector3 direction = new Vector3(horizontalInput, 0, verticalInput).normalized;
 
+        // Check how fast the players are moving
+        if (Input.GetKey(KeyCode.LeftControl))
+        {
+            transform.position = new Vector3(transform.position.x, 2f, transform.position.z);
+            SetState(PlayerStates.Crouching);
+        }
+        else if (Input.GetKey(KeyCode.LeftShift))
+        {
+            transform.position = new Vector3(transform.position.x, 2.5f, transform.position.z);
+            SetState(PlayerStates.Sprinting);
+        }
+        else
+        {
+            transform.position = new Vector3(transform.position.x, 2.5f, transform.position.z);
+            SetState(PlayerStates.Walking);
+        }
+
         if (direction.magnitude >= 0.1f)
         {
             Vector3 forward = Camera.main.transform.TransformDirection(Vector3.forward);
-            forward.y = 0; // Ignore the y component
+            forward.y = 0;
 
             Vector3 right = Camera.main.transform.TransformDirection(Vector3.right);
 
@@ -89,12 +101,15 @@ public class CameraCode : MonoBehaviour
             Vector3 moveDirection = (forward * direction.z + right * direction.x).normalized;
 
             // Move the player using Rigidbody
-            SetState(PlayerStates.Walking);  // Set State to Walking when moving
             RB.MovePosition(RB.position + moveDirection * speed * Time.deltaTime);
         }
         else
         {
-            SetState(PlayerStates.Idle);  // Set State to Idle when not moving
+            if (!Input.GetKey(KeyCode.LeftControl))
+            {
+                transform.position = new Vector3(transform.position.x, 2.5f, transform.position.z);
+                SetState(PlayerStates.Idle);
+            }
         }
     }
 
@@ -138,19 +153,26 @@ public class CameraCode : MonoBehaviour
         State = st;
         if (State == PlayerStates.Idle)
         {
-            Debug.Log(st);
+            //Debug.Log(st);
         }
         if (State == PlayerStates.Walking)
         {
-            Debug.Log(st);
+            //Debug.Log(st);
+            speed = 5f;
         }
-        if (State == PlayerStates.Jumping)
+        if (State == PlayerStates.Crouching)
         {
-            Debug.Log(st);
+            //Debug.Log(st);
+            speed = 1.5f;
+        }
+        if (State == PlayerStates.Sprinting)
+        {
+            //Debug.Log(st);
+            speed = 10f;
         }
         if (State == PlayerStates.Stunned)
         {
-            Debug.Log(st);
+            //Debug.Log(st);
             StunnedTimer = 1;
         }
     }
