@@ -14,6 +14,7 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
     public enum WeepingAngelStates {Walking, Frozen};
     public WeepingAngelStates State;
 
+    public Light Flashlight;
     public AudioSource Footsteps;
     [SerializeField] private AudioClip[] Sounds;
 
@@ -25,7 +26,7 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
     void Update()
     {
         // Check if the player is looking at the enemy within the vision cone
-        if (IsPlayerLookingAtEnemy())
+        if ((IsPlayerLookingAtEnemy() && GameMasterCode.FacilityLightsOn == true) || IsInFlashlightBeam())
         {
             SetState(WeepingAngelStates.Frozen);
         }
@@ -67,6 +68,32 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
             return true;  // Player is looking at the enemy
         }
         return false; // Player is not looking at the enemy
+    }
+
+    bool IsInFlashlightBeam()
+    {
+        if (PlayerCode.FlashLightOn == false) return false;
+
+        // Raycast from the flashlight towards the enemy's position
+        Vector3 flashlightPosition = Flashlight.transform.position;
+        Vector3 flashlightDirection = Flashlight.transform.forward;
+
+        // Check if the enemy is within the flashlight's cone of light
+        Vector3 toEnemy = transform.position - flashlightPosition;
+        float distanceToEnemy = toEnemy.magnitude;
+
+        // Perform a raycast to check if the enemy is within the flashlight's reach
+        if (distanceToEnemy <= Flashlight.range) // Check if the enemy is within the light's range
+        {
+            // Check if the enemy is within the flashlight's cone (angle check)
+            float angle = Vector3.Angle(flashlightDirection, toEnemy);
+
+            if (angle <= Flashlight.spotAngle / 2)
+            {
+                return true; // The enemy is in the flashlight's beam
+            }
+        }
+        return false; // The enemy is not in the flashlight's beam
     }
 
     void Moving()
