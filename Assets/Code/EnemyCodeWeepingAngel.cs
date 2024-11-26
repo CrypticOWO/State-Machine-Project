@@ -65,7 +65,17 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
         // Check if the enemy is within the cone's angle and within the max distance
         if (angle <= coneAngle && toEnemy.magnitude <= maxRaycastDistance)
         {
-            return true;  // Player is looking at the enemy
+            // Check for obstructions (like walls) between the player and the enemy
+            RaycastHit hit;
+            if (Physics.Raycast(cameraPosition, toEnemy.normalized, out hit, maxRaycastDistance, gazeLayerMask))
+            {
+                if (hit.collider.gameObject != gameObject)
+                {
+                    // There is an obstruction between the player and the enemy
+                    return false;
+                }
+            }
+            return true;  // Player is looking at the enemy with no obstructions
         }
         return false; // Player is not looking at the enemy
     }
@@ -78,7 +88,7 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
         Vector3 flashlightPosition = Flashlight.transform.position;
         Vector3 flashlightDirection = Flashlight.transform.forward;
 
-        // Check if the enemy is within the flashlight's cone of light
+        // Check if the enemy is within the flashlight's range
         Vector3 toEnemy = transform.position - flashlightPosition;
         float distanceToEnemy = toEnemy.magnitude;
 
@@ -90,7 +100,17 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
 
             if (angle <= Flashlight.spotAngle / 2)
             {
-                return true; // The enemy is in the flashlight's beam
+                // Check for obstructions between the flashlight and the enemy
+                RaycastHit hit;
+                if (Physics.Raycast(flashlightPosition, flashlightDirection, out hit, Flashlight.range, gazeLayerMask))
+                {
+                    if (hit.collider.gameObject != gameObject)
+                    {
+                        // There is an obstruction between the flashlight and the enemy
+                        return false;
+                    }
+                }
+                return true; // The enemy is in the flashlight's beam with no obstructions
             }
         }
         return false; // The enemy is not in the flashlight's beam
