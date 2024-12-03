@@ -77,7 +77,7 @@ public class CameraCode : MonoBehaviour
         // Create a movement vector
         Vector3 direction = new Vector3(horizontalInput, 0, verticalInput).normalized;
 
-        // Check how fast the players are moving
+        // Adjust player's height based on their state
         if (Input.GetKey(KeyCode.LeftControl))
         {
             transform.position = new Vector3(transform.position.x, 2f, transform.position.z);
@@ -96,19 +96,22 @@ public class CameraCode : MonoBehaviour
 
         if (direction.magnitude >= 0.1f)
         {
+            // Get the forward and right directions from the camera, ensuring y is zeroed
             Vector3 forward = Camera.main.transform.TransformDirection(Vector3.forward);
             forward.y = 0;
-
             Vector3 right = Camera.main.transform.TransformDirection(Vector3.right);
 
-            // Create the final movement vector
+            // Calculate the final movement vector (normalized)
             Vector3 moveDirection = (forward * direction.z + right * direction.x).normalized;
 
-            // Move the player using Rigidbody
-            RB.MovePosition(RB.position + moveDirection * speed * Time.deltaTime);
+            // Set the velocity directly to move the player with no gradual deceleration
+            RB.velocity = new Vector3(moveDirection.x * speed, RB.velocity.y, moveDirection.z * speed);
         }
         else
         {
+            // If no input, set the velocity to zero on the x and z axes, while maintaining the y velocity (for gravity)
+            RB.velocity = new Vector3(0, RB.velocity.y, 0);
+
             if (!Input.GetKey(KeyCode.LeftControl))
             {
                 transform.position = new Vector3(transform.position.x, 2.5f, transform.position.z);
@@ -116,6 +119,7 @@ public class CameraCode : MonoBehaviour
             }
         }
     }
+
 
     IEnumerator PanToNewPosition(Vector3 targetPosition, Quaternion targetRotation, float duration)
     {
