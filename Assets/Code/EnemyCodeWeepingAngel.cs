@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class EnemyCodeWeepingAngel : MonoBehaviour
 {
@@ -18,9 +19,13 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
     public AudioSource Footsteps;
     [SerializeField] private AudioClip[] Sounds;
 
+    public Transform Player;
+    public NavMeshAgent Agent;
+
     void Start()
     {
         startPosition = transform.position;
+        Agent = GetComponent<NavMeshAgent>();
     }
 
     void Update()
@@ -75,6 +80,7 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
                     return false;
                 }
             }
+            Agent.destination = transform.position;
             return true;  // Player is looking at the enemy with no obstructions
         }
         return false; // Player is not looking at the enemy
@@ -98,7 +104,7 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
             // Check if the enemy is within the flashlight's cone (angle check)
             float angle = Vector3.Angle(flashlightDirection, toEnemy);
 
-            if (angle <= Flashlight.spotAngle / 2)
+            if (angle <= Flashlight.spotAngle)
             {
                 // Check for obstructions between the flashlight and the enemy
                 RaycastHit hit;
@@ -110,6 +116,7 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
                         return false;
                     }
                 }
+                Agent.destination = transform.position;
                 return true; // The enemy is in the flashlight's beam with no obstructions
             }
         }
@@ -119,10 +126,7 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
     void Moving()
     {
         // Calculate the movement based on a sine wave to make it oscillate
-        float movement = Mathf.Sin(Time.time * moveSpeed) * moveDistance;
-
-        // Move the enemy back and forth from the start position
-        transform.position = startPosition + new Vector3(movement, 0f, 0f);
+        Agent.destination = Player.position;
 
         // Play the footstep sound while moving (only if it's not already playing)
         if (!Footsteps.isPlaying)

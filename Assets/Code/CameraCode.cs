@@ -32,7 +32,7 @@ public class CameraCode : MonoBehaviour
         LookingAt = "Nothing";
         State = PlayerStates.Menu;  // Set State to Menu initially
 
-        transform.position = new Vector3(8, 2.5f, 26);
+        transform.position = new Vector3(45, 2.5f, -5);
         TargetPlayer.transform.position = transform.position + new Vector3(0, -3, 0);
         transform.localEulerAngles = new Vector3(0, -120, 0);
     }

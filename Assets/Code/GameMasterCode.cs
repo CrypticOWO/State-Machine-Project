@@ -6,11 +6,13 @@ public class GameMasterCode : MonoBehaviour
 {
 
     public static bool FacilityLightsOn;
+    public GameObject FacilityLights;
 
     // Start is called before the first frame update
     void Start()
     {
         FacilityLightsOn = true;
+        FacilityLights.SetActive(true);
     }
 
     // Update is called once per frame
@@ -20,12 +22,12 @@ public class GameMasterCode : MonoBehaviour
         {
             if (FacilityLightsOn == true)
             {
-                //FacilityLights.SetActive(false);
+                FacilityLights.SetActive(false);
                 FacilityLightsOn = false;
             }
             else
             {
-                //FacilityLights.SetActive(true);
+                FacilityLights.SetActive(true);
                 FacilityLightsOn = true;
             }
         }
