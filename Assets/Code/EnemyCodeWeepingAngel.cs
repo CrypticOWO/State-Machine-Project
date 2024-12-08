@@ -8,11 +8,12 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
     public float moveDistance;
     public float moveSpeed;
     public float coneAngle;
+    public float flashAngle;
     public float maxRaycastDistance;
     public LayerMask gazeLayerMask;
     private Vector3 startPosition;
 
-    public enum WeepingAngelStates {Walking, Frozen};
+    public enum WeepingAngelStates {Chasing, Frozen, Escaping, SuperChasing};
     public WeepingAngelStates State;
 
     public Light Flashlight;
@@ -22,14 +23,24 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
     public Transform Player;
     public NavMeshAgent Agent;
 
+    private float DistanceFromPlayer;
+    public List<Transform> MovementNodes;
+
+    public int Aggro;
+    public float AggroTimer;
+
     void Start()
     {
         startPosition = transform.position;
         Agent = GetComponent<NavMeshAgent>();
+        Aggro = 0;
     }
 
     void Update()
     {
+        //Check Distance from Player
+        DistanceFromPlayer = Vector3.Distance(Player.position, transform.position);
+
         // Check if the player is looking at the enemy within the vision cone
         if ((IsPlayerLookingAtEnemy() && GameMasterCode.FacilityLightsOn == true) || IsInFlashlightBeam())
         {
@@ -37,8 +48,26 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
         }
         else
         {
-            SetState(WeepingAngelStates.Walking);
-            Moving();
+            if (Aggro < 3 && (DistanceFromPlayer <= 15 || AggroTimer > 0))
+            {
+                SetState(WeepingAngelStates.Escaping);
+                AggroTimer -= Time.deltaTime; 
+            }
+            else if (Aggro >= 3)
+            {
+                SetState(WeepingAngelStates.SuperChasing);
+                AggroTimer -= Time.deltaTime; 
+                Moving();
+                if (AggroTimer <= 0)
+                {
+                    Aggro = 0;
+                }
+            }
+            else
+            {
+                SetState(WeepingAngelStates.Chasing);
+                Moving();
+            }
         }
     }
 
@@ -46,14 +75,27 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
     {
         if (State == st) return;
         State = st;
-        if (State == WeepingAngelStates.Walking)
+        if (State == WeepingAngelStates.Chasing)
         {
-            //Walking Yippee
+            //Chasing Yippee
         }
         if (State == WeepingAngelStates.Frozen)
         {
+            Agent.destination = transform.position;
+            Aggro = 3;
             Footsteps.Stop();
             Footsteps.PlayOneShot(Sounds[1]);
+        }
+        if (State == WeepingAngelStates.Escaping)
+        {
+            GameMasterCode.DoLightFlicker();
+            Aggro++;
+            AggroTimer = 6;
+            RunAwayFromPlayer();
+        }
+        if (State == WeepingAngelStates.SuperChasing)
+        {
+            AggroTimer = 5;
         }
     }
 
@@ -80,7 +122,6 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
                     return false;
                 }
             }
-            Agent.destination = transform.position;
             return true;  // Player is looking at the enemy with no obstructions
         }
         return false; // Player is not looking at the enemy
@@ -90,37 +131,30 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
     {
         if (PlayerCode.FlashLightOn == false) return false;
 
-        // Raycast from the flashlight towards the enemy's position
-        Vector3 flashlightPosition = Flashlight.transform.position;
-        Vector3 flashlightDirection = Flashlight.transform.forward;
+        // Get the direction from the camera to the enemy
+        Vector3 cameraPosition = Camera.main.transform.position;
+        Vector3 cameraForward = Camera.main.transform.forward;
+        Vector3 toEnemy = transform.position - cameraPosition;
 
-        // Check if the enemy is within the flashlight's range
-        Vector3 toEnemy = transform.position - flashlightPosition;
-        float distanceToEnemy = toEnemy.magnitude;
+        // Calculate the angle between the camera's forward vector and the vector to the enemy
+        float angle = Vector3.Angle(cameraForward, toEnemy);
 
-        // Perform a raycast to check if the enemy is within the flashlight's reach
-        if (distanceToEnemy <= Flashlight.range) // Check if the enemy is within the light's range
+        // Check if the enemy is within the cone's angle and within the max distance
+        if (angle <= flashAngle && toEnemy.magnitude <= 10.475f)
         {
-            // Check if the enemy is within the flashlight's cone (angle check)
-            float angle = Vector3.Angle(flashlightDirection, toEnemy);
-
-            if (angle <= Flashlight.spotAngle)
+            // Check for obstructions (like walls) between the player and the enemy
+            RaycastHit hit;
+            if (Physics.Raycast(cameraPosition, toEnemy.normalized, out hit, 10.475f, gazeLayerMask))
             {
-                // Check for obstructions between the flashlight and the enemy
-                RaycastHit hit;
-                if (Physics.Raycast(flashlightPosition, flashlightDirection, out hit, Flashlight.range, gazeLayerMask))
+                if (hit.collider.gameObject != gameObject)
                 {
-                    if (hit.collider.gameObject != gameObject)
-                    {
-                        // There is an obstruction between the flashlight and the enemy
-                        return false;
-                    }
+                    // There is an obstruction between the player and the enemy
+                    return false;
                 }
-                Agent.destination = transform.position;
-                return true; // The enemy is in the flashlight's beam with no obstructions
             }
+            return true;  // Player is looking at the enemy with no obstructions
         }
-        return false; // The enemy is not in the flashlight's beam
+        return false; // Player is not looking at the enemy
     }
 
     void Moving()
@@ -133,5 +167,23 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
         {
             Footsteps.PlayOneShot(Sounds[0]);
         }
+    }
+
+    void RunAwayFromPlayer()
+    {
+        float FurthestDistanceSoFar = 0;
+        Vector3 FarNode = Vector3.zero;
+
+        foreach (Transform Node in MovementNodes)
+        {
+            float CheckCurrentDistance = Vector3.Distance(Player.position, Node.position);
+            if (CheckCurrentDistance > FurthestDistanceSoFar)
+            {
+                FurthestDistanceSoFar = CheckCurrentDistance;
+                FarNode = Node.position;
+            }
+        }
+        //Set the right destination for the furthest spot
+        Agent.destination = FarNode;
     }
 }

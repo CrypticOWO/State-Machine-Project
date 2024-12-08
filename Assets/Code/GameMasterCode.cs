@@ -5,10 +5,16 @@ using UnityEngine;
 public class GameMasterCode : MonoBehaviour
 {
 
+    static public GameMasterCode instance;
     public static bool FacilityLightsOn;
     public GameObject FacilityLights;
 
     // Start is called before the first frame update
+
+    void Awake()
+    {
+        instance = this;
+    }
     void Start()
     {
         FacilityLightsOn = true;
@@ -31,5 +37,25 @@ public class GameMasterCode : MonoBehaviour
                 FacilityLightsOn = true;
             }
         }
+    }
+
+    IEnumerator LightFlicker()
+    {
+        FacilityLights.SetActive(false);
+        FacilityLightsOn = false;
+        yield return new WaitForSeconds(0.2f);
+        FacilityLights.SetActive(true);
+        FacilityLightsOn = true;
+        yield return new WaitForSeconds(0.2f);
+        FacilityLights.SetActive(false);
+        FacilityLightsOn = false;
+        yield return new WaitForSeconds(0.2f);
+        FacilityLights.SetActive(true);
+        FacilityLightsOn = true;
+    }
+
+    public static void DoLightFlicker()
+    {
+        instance.StartCoroutine(instance.LightFlicker());
     }
 }
