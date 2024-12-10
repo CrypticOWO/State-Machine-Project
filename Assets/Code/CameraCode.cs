@@ -89,6 +89,7 @@ public class CameraCode : MonoBehaviour
         {
             transform.position = new Vector3(transform.position.x, 2, transform.position.z);
             SetState(PlayerStates.Crouching);
+            ScaleSprintMeter();
             if (!Footsteps.isPlaying)
             {
                 Footsteps.PlayOneShot(Sounds[0]);
@@ -98,6 +99,7 @@ public class CameraCode : MonoBehaviour
         {
             transform.position = new Vector3(transform.position.x, 2.5f, transform.position.z);
             SetState(PlayerStates.Sprinting);
+            ScaleSprintMeter();
             if (!Footsteps.isPlaying)
             {
                 Footsteps.PlayOneShot(Sounds[1]);
@@ -107,6 +109,7 @@ public class CameraCode : MonoBehaviour
         {
             transform.position = new Vector3(transform.position.x, 2.5f, transform.position.z);
             SetState(PlayerStates.Walking);
+            ScaleSprintMeter();
             if (!Footsteps.isPlaying)
             {
                 Footsteps.PlayOneShot(Sounds[2]);
@@ -262,8 +265,25 @@ public class CameraCode : MonoBehaviour
         // Apply the new rotation over a short duration (0.3 seconds)
         yield return StartCoroutine(PanToNewPosition(transform.position, newRotation, 0.3f));
 
+        SetState(PlayerStates.Menu);
+
         // Re-enable the collider after the animation finishes
         collider.enabled = true;
         RB.isKinematic = true;
+    }
+
+    void ScaleSprintMeter()
+    {
+        if(State == PlayerStates.Sprinting)
+        {
+            float scaleFactor = Mathf.Max(1f, 0.01f - Time.time);
+            UIManager.SprintMeter.transform.localScale = new Vector3(scaleFactor, 0.5f, 1);
+        }
+        else
+        {
+            float scaleFactor = Mathf.Max(1f, 0.01f + Time.time);
+            UIManager.SprintMeter.transform.localScale = new Vector3(scaleFactor, 0.5f, 1);
+        }
+
     }
 }

@@ -14,12 +14,18 @@ public class UIManager : MonoBehaviour
 
     public AudioSource UISounds;
     [SerializeField] private AudioClip[] Sounds;
+    
+    public GameObject UIWhole;
+    public static GameObject SprintMeter;
+    public static GameObject BatteryMeter;
 
     // Start is called before the first frame update
     void Start()
     {
         LookingAtText.text = " ";
         Angel.SetActive(false);
+        SprintMeter = UIWhole.transform.Find("Stamina")?.gameObject;
+        BatteryMeter = UIWhole.transform.Find("Battery")?.gameObject;
     }
 
     // Update is called once per frame
