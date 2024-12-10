@@ -13,7 +13,7 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
     public LayerMask gazeLayerMask;
     private Vector3 startPosition;
 
-    public enum WeepingAngelStates {Chasing, Frozen, Escaping, SuperChasing};
+    public enum WeepingAngelStates {Chasing, Frozen, Escaping, SuperChasing, Killing};
     public WeepingAngelStates State;
 
     public Light Flashlight;
@@ -31,7 +31,6 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
 
     void Start()
     {
-        startPosition = transform.position;
         Agent = GetComponent<NavMeshAgent>();
         Aggro = 0;
     }
@@ -42,9 +41,13 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
         DistanceFromPlayer = Vector3.Distance(Player.position, transform.position);
 
         // Check if the player is looking at the enemy within the vision cone
-        if ((IsPlayerLookingAtEnemy() && GameMasterCode.FacilityLightsOn == true) || IsInFlashlightBeam())
+        if (State != WeepingAngelStates.Killing && (IsPlayerLookingAtEnemy() && GameMasterCode.FacilityLightsOn == true) || IsInFlashlightBeam())
         {
             SetState(WeepingAngelStates.Frozen);
+        }
+        else if(State == WeepingAngelStates.Killing)
+        {
+            Killing();
         }
         else
         {
@@ -78,6 +81,7 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
         if (State == WeepingAngelStates.Chasing)
         {
             //Chasing Yippee
+            
         }
         if (State == WeepingAngelStates.Frozen)
         {
@@ -90,12 +94,16 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
         {
             GameMasterCode.DoLightFlicker();
             Aggro++;
-            AggroTimer = 6;
+            AggroTimer = GameMasterCode.OnComputers;
             RunAwayFromPlayer();
         }
         if (State == WeepingAngelStates.SuperChasing)
         {
             AggroTimer = 5;
+        }
+        if (State == WeepingAngelStates.Killing)
+        {
+            //ehe
         }
     }
 
@@ -183,7 +191,28 @@ public class EnemyCodeWeepingAngel : MonoBehaviour
                 FarNode = Node.position;
             }
         }
+
         //Set the right destination for the furthest spot
         Agent.destination = FarNode;
+
+        if (!Footsteps.isPlaying)
+        {
+            Footsteps.PlayOneShot(Sounds[0]);
+        }
+    }
+
+    private void OnCollisionEnter(Collision other)
+    {
+       if (other.gameObject.CompareTag("MainCamera"))
+       {
+            SetState(WeepingAngelStates.Killing);
+            Agent.speed = 0;
+            Agent.acceleration = 0;
+       }
+    }
+
+    public void Killing()
+    {
+        
     }
 }

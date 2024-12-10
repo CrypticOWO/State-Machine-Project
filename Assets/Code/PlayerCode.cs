@@ -15,7 +15,7 @@ public class PlayerCode : MonoBehaviour
 
     void Update()
     {
-        transform.position = TargetCamera.transform.position + new Vector3(0,-2f, 0);
+        transform.position = TargetCamera.transform.position + new Vector3(0,-1f, 0);
 
         if (Input.GetKeyDown(KeyCode.F))
         {

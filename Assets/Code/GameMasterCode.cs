@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class GameMasterCode : MonoBehaviour
 {
-
     static public GameMasterCode instance;
     public static bool FacilityLightsOn;
     public GameObject FacilityLights;
+    public static int OnComputers;
 
     // Start is called before the first frame update
 
@@ -19,6 +19,7 @@ public class GameMasterCode : MonoBehaviour
     {
         FacilityLightsOn = true;
         FacilityLights.SetActive(true);
+        OnComputers = 9;
     }
 
     // Update is called once per frame
