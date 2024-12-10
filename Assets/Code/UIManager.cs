@@ -13,8 +13,9 @@ public class UIManager : MonoBehaviour
     public GameObject Angel;
     public GameObject Player;
     public static bool InGame;
-    public static bool GameOverBad;
-    public static bool GameOverGood;
+    public static bool GameOver;
+    public static bool Escaped;
+    public GameObject GoodText;
 
     public AudioSource UISounds;
     [SerializeField] private AudioClip[] Sounds;
@@ -40,12 +41,13 @@ public class UIManager : MonoBehaviour
         BatteryWhole.SetActive(false);
         ResetButton.SetActive(false);
         ComputerRatio.SetActive(false);
+        GoodText.SetActive(false);
 
         SprintMeter = StaminaWhole.transform.Find("Stamina")?.GetComponent<Image>();
         BatteryMeter = BatteryWhole.transform.Find("Battery")?.GetComponent<Image>();
         InGame = false;
-        GameOverBad = false;
-        GameOverGood = false;
+        GameOver = false;
+        Escaped = false;
     }
 
     // Update is called once per frame
@@ -120,7 +122,8 @@ public class UIManager : MonoBehaviour
                     UISounds.PlayOneShot(Sounds[1]);
                     
                     InGame = false;
-                    GameOverGood = true;
+                    GameOver = true;
+                    Escaped = true;
                 }
             }
         }
@@ -129,14 +132,17 @@ public class UIManager : MonoBehaviour
             LookingAtText.text = " ";
         }
 
-        if (InGame == false && GameOverBad == true)
+        if (InGame == false && GameOver == true)
         {
             ResetButton.SetActive(true);
-        }
-
-        if (InGame == false && GameOverGood == true)
-        {
-            ResetButton.SetActive(true);
+            if (Escaped == true)
+            {
+                GoodText.SetActive(true);
+                BatteryWhole.SetActive(false);
+                StaminaWhole.SetActive(false);
+                ComputerRatio.SetActive(false);
+                ComputerRatioText.text = " ";
+            }
         }
 
         //SUPER CHEAT

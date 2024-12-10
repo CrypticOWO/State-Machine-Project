@@ -50,7 +50,7 @@ public class CameraCode : MonoBehaviour
 
     void Update()
     {
-        if(State == PlayerStates.Menu)
+        if(State == PlayerStates.Menu || UIManager.GameOver == true)
         {
             MenuControls();
         }    
@@ -256,7 +256,6 @@ public class CameraCode : MonoBehaviour
 
     public void StunnedControls()
     {
-        StunnedTimer -= Time.deltaTime;
         if (StunnedTimer <= 0)
         {
             SetState(PlayerStates.Idle);
@@ -296,7 +295,7 @@ public class CameraCode : MonoBehaviour
         yield return StartCoroutine(PanToNewPosition(transform.position, newRotation, 0.3f));
 
         SetState(PlayerStates.Menu);
-        UIManager.GameOverBad = true;
+        UIManager.GameOver = true;
 
         // Re-enable the collider after the animation finishes
         collider.enabled = true;

@@ -21,6 +21,7 @@ public class GameMasterCode : MonoBehaviour
         FacilityLightsOn = true;
         FacilityLights.SetActive(true);
         OnComputers = 9;
+        OffComputers = 0;
     }
 
     // Update is called once per frame
