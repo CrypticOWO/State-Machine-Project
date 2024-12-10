@@ -52,6 +52,7 @@ public class CameraCode : MonoBehaviour
     {
         if(State == PlayerStates.Menu || UIManager.GameOver == true)
         {
+            SetState(PlayerStates.Menu);
             MenuControls();
         }    
         else if(State == PlayerStates.Stunned)
