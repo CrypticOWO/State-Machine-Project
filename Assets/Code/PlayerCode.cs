@@ -6,6 +6,8 @@ public class PlayerCode : MonoBehaviour
     public GameObject Flashlight;
 
     public static bool FlashLightOn;
+    public float Battery, MaxBattery;
+    public float LightCost;
 
     void Start()
     {
@@ -16,6 +18,17 @@ public class PlayerCode : MonoBehaviour
     void Update()
     {
         transform.position = TargetCamera.transform.position + new Vector3(0,-1f, 0);
+
+        if (FlashLightOn == true && Battery > 0)
+        {
+            Battery -= LightCost * Time.deltaTime;
+            UIManager.BatteryMeter.fillAmount = Battery / MaxBattery;
+        }
+
+        if (Battery < 0)
+        {
+            Battery = 0;
+        }
 
         if (Input.GetKeyDown(KeyCode.F))
         {

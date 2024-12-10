@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CameraCode : MonoBehaviour
 {
@@ -23,6 +24,10 @@ public class CameraCode : MonoBehaviour
 
     public AudioSource Footsteps;
     [SerializeField] private AudioClip[] Sounds;
+
+    public float Stamina, MaxStamina;
+    public float SprintCost;
+    public float SprintCoolDownTimer;
 
     void Start()
     {
@@ -58,6 +63,15 @@ public class CameraCode : MonoBehaviour
             NormalControls();
         }
 
+        if (Stamina < 0)
+        {
+            Stamina = 0;
+            SprintCoolDownTimer = 5;
+        }
+        else if (Stamina > 100)
+        {
+            Stamina = 100;
+        }
     }
 
     void NormalControls()
@@ -89,17 +103,24 @@ public class CameraCode : MonoBehaviour
         {
             transform.position = new Vector3(transform.position.x, 2, transform.position.z);
             SetState(PlayerStates.Crouching);
-            ScaleSprintMeter();
+            
+            Stamina += (0.5f * SprintCost) * Time.deltaTime;
+            UIManager.SprintMeter.fillAmount = Stamina / MaxStamina;
+            SprintCoolDownTimer -= Time.deltaTime;
+
             if (!Footsteps.isPlaying)
             {
                 Footsteps.PlayOneShot(Sounds[0]);
             }
         }
-        else if (Input.GetKey(KeyCode.LeftShift))
+        else if (Input.GetKey(KeyCode.LeftShift) && Stamina > 0 && SprintCoolDownTimer <= 0)
         {
             transform.position = new Vector3(transform.position.x, 2.5f, transform.position.z);
             SetState(PlayerStates.Sprinting);
-            ScaleSprintMeter();
+
+            Stamina -= SprintCost * Time.deltaTime;
+            UIManager.SprintMeter.fillAmount = Stamina / MaxStamina;
+
             if (!Footsteps.isPlaying)
             {
                 Footsteps.PlayOneShot(Sounds[1]);
@@ -109,7 +130,11 @@ public class CameraCode : MonoBehaviour
         {
             transform.position = new Vector3(transform.position.x, 2.5f, transform.position.z);
             SetState(PlayerStates.Walking);
-            ScaleSprintMeter();
+            
+            Stamina += (0.25f * SprintCost) * Time.deltaTime;
+            UIManager.SprintMeter.fillAmount = Stamina / MaxStamina;
+            SprintCoolDownTimer -= Time.deltaTime;
+
             if (!Footsteps.isPlaying)
             {
                 Footsteps.PlayOneShot(Sounds[2]);
@@ -138,6 +163,10 @@ public class CameraCode : MonoBehaviour
             {
                 transform.position = new Vector3(transform.position.x, 2.5f, transform.position.z);
                 SetState(PlayerStates.Idle);
+
+                Stamina += SprintCost * Time.deltaTime;
+                UIManager.SprintMeter.fillAmount = Stamina / MaxStamina;
+                SprintCoolDownTimer -= Time.deltaTime;
             }
         }
     }
@@ -219,7 +248,7 @@ public class CameraCode : MonoBehaviour
 
     public void MenuControls()
     {
-        if (Input.GetKey(KeyCode.P))
+        if (UIManager.InGame == true)
         {
             SetState(PlayerStates.Idle);
         }
@@ -242,6 +271,7 @@ public class CameraCode : MonoBehaviour
             StartCoroutine(NeckSnap());
             //Death Sound and Effect
             Footsteps.PlayOneShot(Sounds[3]);
+            UIManager.InGame = false;
        }
     }
 
@@ -266,6 +296,7 @@ public class CameraCode : MonoBehaviour
         yield return StartCoroutine(PanToNewPosition(transform.position, newRotation, 0.3f));
 
         SetState(PlayerStates.Menu);
+        UIManager.GameOverBad = true;
 
         // Re-enable the collider after the animation finishes
         collider.enabled = true;

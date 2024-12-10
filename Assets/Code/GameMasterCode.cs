@@ -7,6 +7,7 @@ public class GameMasterCode : MonoBehaviour
     static public GameMasterCode instance;
     public static bool FacilityLightsOn;
     public GameObject FacilityLights;
+    public static int OffComputers;
     public static int OnComputers;
 
     // Start is called before the first frame update
