@@ -153,12 +153,12 @@ public class CameraCode : MonoBehaviour
             Vector3 moveDirection = (forward * direction.z + right * direction.x).normalized;
 
             // Set the velocity directly to move the player with no gradual deceleration
-            RB.velocity = new Vector3(moveDirection.x * speed, RB.velocity.y, moveDirection.z * speed);
+            RB.linearVelocity = new Vector3(moveDirection.x * speed, RB.linearVelocity.y, moveDirection.z * speed);
         }
         else
         {
             // If no input, set the velocity to zero on the x and z axes, while maintaining the y velocity (for gravity)
-            RB.velocity = new Vector3(0, RB.velocity.y, 0);
+            RB.linearVelocity = new Vector3(0, RB.linearVelocity.y, 0);
 
             if (!Input.GetKey(KeyCode.LeftControl))
             {
